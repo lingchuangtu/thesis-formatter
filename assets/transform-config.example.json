@@ -1,0 +1,76 @@
+{
+  "_说明": "路径B 格式移植配置示例。基于真实的青海大学模板 + LCA 论文实践。先 python scripts/transform_paper.py --print-template 看最小骨架，再按诊断结果填写本文件各字段。",
+
+  "paper": "输入论文.docx",
+  "template": "学校格式模板.docx",
+  "output": "输出_已排版.docx",
+
+  "title": {
+    "_说明": "把模板页眉里的示例论文题目替换成真实题目",
+    "old": "模板示例论文题目",
+    "new": "你的真实论文题目"
+  },
+
+  "styles": {
+    "import_ids": [
+      "CMheading1", "CMheading2", "CMheading3", "CMcontent", "CMcaption",
+      "CMcaptionTable", "CMreflist", "CMheadingNo"
+    ],
+    "_import_ids说明": "从模板导入到论文的自定义样式ID（诊断时从模板 styles.xml 读出）。标准样式无需列。",
+    "code_style_size_halfpt": 21,
+    "_code说明": "代码样式字号（半磅，21=10.5pt五号）。论文原 Code 样式常异常小，可在此校正；不需要则删掉此键。"
+  },
+
+  "role_rules": [
+    {"when": {"equals": "参考文献"}, "style": "CMheadingNo", "strip_bold": true},
+    {"when": {"style": "Heading1"}, "style": "CMheading1", "strip_bold": true},
+    {"when": {"style": "Heading2"}, "style": "CMheading2", "strip_bold": true},
+    {"when": {"style": "Heading3"}, "style": "CMheading3", "strip_bold": true},
+    {"when": {"regex": "^图\\s*\\d"}, "style": "CMcaption"},
+    {"when": {"regex": "^表\\s*\\d"}, "style": "CMcaptionTable"},
+    {"when": {"style": "BodyText3"}, "style": "CMcontent"},
+    {"when": {"style": "Code"}, "style": "Code"}
+  ],
+  "_role_rules说明": "有序规则，先匹配先应用。when 支持 index:[起,终] / style / regex / equals / maxlen，多条件同时满足。strip_bold:true 清除原论文run残留的加粗（标题必开）。留一个空 when 的 rule 作兜底可把剩余段落套某样式。",
+
+  "renumber": {
+    "enabled": true,
+    "heading_style": "CMheading1",
+    "toc_index_range": [9, 44],
+    "cn_to_arabic": true,
+    "add_period": false,
+    "_说明": "把章标题中文数字改阿拉伯数字；toc_index_range 是目录段落索引区间，只改章号、保留页码域。若论文编号已合规则 enabled=false。"
+  },
+
+  "page_sets": {
+    "body": {"w": 11906, "h": 16838, "top": 1587, "right": 1134, "bottom": 1247,
+             "left": 1701, "header": 1020, "footer": 793, "gutter": 0, "cols": 720, "linePitch": 312},
+    "cover": {"w": 11906, "h": 16838, "top": 1440, "right": 1800, "bottom": 1440,
+              "left": 1800, "header": 851, "footer": 992, "gutter": 0, "cols": 425, "linePitch": 312}
+  },
+  "_page_sets说明": "单位 twips（1cm≈567）。从模板各节 pgSz/pgMar 读出。可定义多套，供 sections.page 引用。",
+
+  "header_parts": ["header1.xml", "header2.xml"],
+  "footer_parts": ["footer1.xml"],
+  "_parts说明": "需要从模板复制的页眉页脚部件名（诊断时枚举 word/header*.xml、word/footer*.xml）。脚本自动分配不冲突的新 rId。",
+
+  "header_text": {
+    "header2.xml": "第1章 绪论",
+    "_说明": "奇数页眉文字覆盖。键是 header 文件名，值是该节显示的章节名。用 '__TITLE__' 表示替换为 title.new（偶数页眉通常放论文题目，一般靠 title.old→new 自动替换即可，无需在此列）。"
+  },
+  "even_odd_headers": true,
+  "_even_odd说明": "模板启用奇偶页眉不同时为 true，脚本会写 <w:evenAndOddHeaders/>。",
+
+  "sections": [
+    {"name": "封面", "end": 1, "page": "cover"},
+    {"name": "摘要", "end": 4, "page": "body",
+     "header": {"even": "header1.xml", "default": "header2.xml"},
+     "footer": {"default": "footer1.xml"},
+     "pgnum": {"fmt": "upperRoman", "start": "1"}},
+    {"name": "正文第1章", "end": null, "page": "body",
+     "header": {"default": "header2.xml"},
+     "footer": {"default": "footer1.xml"},
+     "pgnum": {"fmt": "decimal", "start": "1"}}
+  ],
+  "_sections说明": "按文档顺序列出每节。end=本节最后一个段落的 body 直属 w:p 索引；最后一节用 null。header/footer 的 even=偶数页、default=奇数页/普通页，值是部件文件名。pgnum.fmt 常用 upperRoman（前置页）/decimal（正文），start 为该节页码起始。封面节不给 header/footer/pgnum 即无页眉页脚。"
+}
