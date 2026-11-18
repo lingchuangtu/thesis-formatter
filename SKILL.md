@@ -26,7 +26,21 @@ agent_created: true
 
 缺少模板或论文文本时一次性请求补充；齐全则不提问，直接执行。
 
-## 工作流
+## 第一步：判断走哪条路径（关键，必做）
+
+先看论文形态，选错路径会丢内容：
+
+| 论文形态 | 路径 | 核心脚本 |
+| --- | --- | --- |
+| 纯文本/简单初稿，**无表格/图片/代码** | **A. 克隆法** | `build_document.py` |
+| 已完成的论文，**含表格/图片/代码**，或模板为多分节+自定义样式 | **B. 移植法** | `transform_paper.py`（+ `rebuild_cover.py`） |
+
+判断方法：检查论文 docx 是否含 `word/media/`、`w:tbl`、`w:drawing`；模板 `styles.xml` 是否有非标准样式名（如 `CMheading1`）、`document.xml` 是否有多个 `w:sectPr`。**任一命中即走路径 B。**
+
+- 路径 B 的完整方法、诊断清单、避坑经验见 `references/real-world-workflow.md`，配置示例见 `assets/transform-config.example.json` 和 `assets/cover-config.example.json`。
+- 下面步骤 1~5 是**路径 A（克隆法）**；路径 B 按 real-world-workflow.md 执行「诊断 → 配置 → transform_paper → rebuild_cover（如需）→ 验证三件套」。
+
+## 工作流（路径 A：克隆法）
 
 ### 步骤 1：解析模板，建立版式基线
 
@@ -62,11 +76,25 @@ agent_created: true
 - 提供可下载、可编辑的 .docx 与 `report.md`。
 - 交付说明简短：使用的模板、验收结果（FAIL 数）、需人工复核的少量位置（如目录页码需在 Word 中按 F9 更新、占位符）。
 
+## 路径 B：移植法速查（真实论文）
+
+1. **诊断**（只读，不写代码）：按 `references/real-world-workflow.md` 第二节摸清模板分节/样式/页码和论文段落/标题编号/内容指纹。
+2. **配置**：`python scripts/transform_paper.py --print-template` 出配置骨架，按诊断填 `assets/transform-config.example.json`。
+3. **移植**：`python scripts/transform_paper.py <配置.json>` —— 样式移植 + 清直接格式 + 标题重编号 + 分节重建 + 页眉页脚移植，输出时自带结构零丢失自检。
+4. **封面**（如需）：`python scripts/rebuild_cover.py <封面配置.json>` —— 配置骨架用 `--print-template` 生成。
+5. **验证三件套**：
+   - `python scripts/audit_content.py <原论文> <成品> --normalize-headings` —— 内容零丢失（全 PASS）。
+   - `python scripts/inspect_template.py <模板> -o spec.json` + `python scripts/verify_requirements.py <成品> --spec spec.json --report report.md` —— 格式达标（区分真实缺陷与示例文字/自定义样式误报，见参考文档第五节）。
+   - 目视复核封面、页码起算、奇偶页眉、目录 F9 更新。
+
 ## 红线
 
-- 不得新建空白文档拼版；必须从模板原包克隆，否则无法保证页眉页脚/页码/字号零损。
-- 不得跳过 `verify_requirements.py`；FAIL 未清零不得交付。
+- **含表格/图片/代码的论文绝不用克隆法**，必须走移植法，否则丢图丢表。
+- 不得新建空白文档拼版；路径 A 必须从模板原包克隆，路径 B 必须以论文原文件为基线。
+- 不得跳过内容零丢失验证；`audit_content.py` 非全 PASS 不得交付。
+- 不得跳过 `verify_requirements.py`；FAIL 未清零（或误报未说明）不得交付。
 - 不得篡改页眉页脚中的域为静态文字；PAGE / NUMPAGES 必须保持为域。
+- 标题/目录编号必须与模板统一；改目录时只改章号文字，页码域与制表位不动。
 - 不得编造论文内容、数据或参考文献。
 - 不得修改用户提供的原始模板文件。
 
@@ -77,12 +105,18 @@ agent_created: true
 ## 资源
 
 - `scripts/inspect_template.py`：解析模板 → spec.json + 人类可读摘要。
-- `scripts/build_document.py`：克隆模板 + 替换正文 → 输出 docx。
+- `scripts/build_document.py`：**路径A** 克隆模板 + 替换正文 → 输出 docx。
+- `scripts/transform_paper.py`：**路径B** 配置驱动的格式移植（样式/分节/页眉页脚/标题编号）→ 输出 docx，含结构自检。
+- `scripts/rebuild_cover.py`：**路径B** 按模板重建封面（校徽/字段/独立节）。
+- `scripts/audit_content.py`：内容零丢失核验（文字哈希/图片/表格/绘图/XML），`--normalize-headings` 容忍编号规范化。
 - `scripts/verify_requirements.py`：逐项验收 → report.md（FAIL 非零退出）。
 - `scripts/docx_utils.py`：共享 OOXML 读写工具（无第三方依赖）。
 - `references/format-checklist.md`：全部格式硬性要求清单。
-- `assets/content.example.json`：内容模型示例。
+- `references/real-world-workflow.md`：**真实模板/复杂论文完整方法论**（诊断、五步移植、验证三件套、10 条避坑）。
+- `assets/content.example.json`：路径A 内容模型示例。
 - `assets/requirements.example.json`：额外硬性要求示例。
+- `assets/transform-config.example.json`：路径B 移植配置示例。
+- `assets/cover-config.example.json`：路径B 封面配置示例。
 - `tests/selftest.py`：一键自测（正向 FAIL=0 + 负向拦截验证）。
 
 ## 免责声明
