@@ -1,0 +1,40 @@
+{
+  "_说明": "路径B 封面重建配置示例。先 python scripts/rebuild_cover.py --print-template 看最小骨架。用于论文原文没有规范封面时，从模板搬一个标准封面过来。",
+
+  "src": "已排版_无封面.docx",
+  "template": "学校格式模板.docx",
+  "output": "已排版_带封面.docx",
+
+  "title": {
+    "old": "模板示例论文题目",
+    "new": "你的真实论文题目"
+  },
+
+  "cover_range": [0, 18],
+  "_range说明": "模板封面段落区间 [起, 终)，按 body 直属 w:p 数。诊断时打印模板前 20 段，找到封面最后一段（通常含答辩日期）的索引+1。",
+
+  "fields_to_blank": ["学生姓名", "学号", "指导教师", "专业年级",
+                      "所在学院和系", "完成日期", "答辩日期"],
+  "_fields说明": "这些字段的值会被清空、标签保留（供用户在 Word 里自填）。按『标签含关键词』匹配，空格不影响。若模板字段值本就是空的，留空列表 []。",
+
+  "logo": {
+    "template_rid": "rId7",
+    "template_media": "word/media/image1.png",
+    "output_media": "word/media/school_logo.png",
+    "output_rid": "rId99",
+    "_说明": "校徽：从模板的 media 取图，改写到输出 media；template_rid 是模板封面图片引用，output_rid 是新文档里不冲突的 rId（脚本会自动避让已占用的 Id）。模板无校徽可删掉整个 logo 对象。"
+  },
+
+  "drop_paragraphs": [0, 1],
+  "_drop说明": "src 中要删除的段落索引（如原论文标题、自带声明）。注意：这是 transform 之后文档的段落索引。",
+
+  "move_to_cover": [],
+  "_move说明": "src 中要移到封面末尾保留的段落索引（如需要保留的声明）。会清除其自带 sectPr。不需要则留空列表。",
+
+  "cover_section": {
+    "w": 11906, "h": 16838, "top": 1440, "right": 1800, "bottom": 1440,
+    "left": 1800, "header": 851, "footer": 992, "gutter": 0,
+    "cols": 425, "linePitch": 312
+  },
+  "_section说明": "封面页边距（twips），从模板封面节的 pgSz/pgMar 读出。脚本会把封面设为独立节、无页眉页脚、正文从下一节起算页码。"
+}
