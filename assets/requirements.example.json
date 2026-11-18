@@ -1,0 +1,22 @@
+{
+  "styles": {
+    "Normal": {
+      "font_eastAsia": "宋体",
+      "font_ascii": "Times New Roman",
+      "size_pt": 12,
+      "alignment": "both"
+    },
+    "Heading1": {"size_pt": 16, "bold": true}
+  },
+  "sections": [
+    {
+      "pgNumType": {"fmt": "decimal", "start": "1"},
+      "pgMar": {"top": "1440", "bottom": "1440", "left": "1800", "right": "1800"}
+    }
+  ],
+  "required_text": ["摘要", "关键词", "参考文献", "第1章"],
+  "forbidden_text": ["【填写题目】", "XXX", "待补充"],
+  "require_page_field_in_footer": true,
+  "require_page_field_in_header": false,
+  "min_paragraphs": 10
+}

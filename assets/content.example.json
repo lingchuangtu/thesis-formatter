@@ -1,0 +1,17 @@
+{
+  "title": "论文题目示例",
+  "paragraphs": [
+    {"style": "Title", "text": "论文题目示例", "alignment": "center"},
+    {"style": "Normal", "text": "摘要：本文研究……", "run": {"bold": false}},
+    {"style": "Normal", "text": "关键词：关键词一；关键词二"},
+    {"page_break": true},
+    {"style": "Heading1", "text": "第1章 绪论", "keep_next": true},
+    {"style": "Normal", "text": "本章介绍研究背景与意义。", "indent_first_line": true},
+    {"style": "Normal", "text": "这是换页后的段落。", "page_break_before": true},
+    {"style": "Heading2", "text": "1.1 研究背景", "keep_next": true},
+    {"style": "Normal", "text": "正文段落，字号与字体继承模板 Normal 样式。", "indent_first_line": true},
+    {"style": "Caption", "text": "图 1-1 示例图", "alignment": "center"},
+    {"style": "Heading1", "text": "参考文献", "keep_next": true},
+    {"style": "Bibliography", "text": "[1] 作者. 文献题名[J]. 期刊, 2020.", "hanging": true}
+  ]
+}
