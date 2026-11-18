@@ -264,8 +264,10 @@ def extract_styles(styles_root: ET.Element) -> dict:
     result = {}
     defaults = child(styles_root, "w:docDefaults")
     if defaults is not None:
-        rpr_default = child(child(defaults, "w:rPrDefault"), "w:rPr")
-        ppr_default = child(child(defaults, "w:pPrDefault"), "w:pPr")
+        rpr_holder = child(defaults, "w:rPrDefault")
+        ppr_holder = child(defaults, "w:pPrDefault")
+        rpr_default = child(rpr_holder, "w:rPr") if rpr_holder is not None else None
+        ppr_default = child(ppr_holder, "w:pPr") if ppr_holder is not None else None
         result["__docDefaults__"] = {
             "run": extract_run_props(rpr_default),
             "paragraph": extract_par_props(ppr_default),

@@ -15,6 +15,18 @@
 
 无需 pip 依赖，Python 3.8+ 即可（仅用标准库 `zipfile` + `xml.etree`）。
 
+## 测试
+
+一键自测（生成演示模板，跑通解析→排版→验收全流程，并做负向测试确认验收器能拦截错误）：
+
+```bash
+python tests/selftest.py
+```
+
+预期输出：`[5/5] 全部通过`，正向验收 `FAIL=0`，负向测试 `FAIL=1`（正确拦截）。
+
+真实测试：提供你自己的学校 `.docx` 模板与论文文本，让 WorkBuddy 按 SKILL.md 工作流执行，检查生成的 `report.md` 中 FAIL 是否为 0。
+
 ## 使用
 
 1. 提供学校 `.docx` 格式模板与论文文本/初稿。
@@ -45,6 +57,8 @@ thesis-formatter/
 │   ├── inspect_template.py
 │   ├── build_document.py
 │   └── verify_requirements.py
+├── tests/
+│   └── selftest.py
 ├── references/
 │   └── format-checklist.md
 └── assets/

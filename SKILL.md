@@ -83,6 +83,7 @@ agent_created: true
 - `references/format-checklist.md`：全部格式硬性要求清单。
 - `assets/content.example.json`：内容模型示例。
 - `assets/requirements.example.json`：额外硬性要求示例。
+- `tests/selftest.py`：一键自测（正向 FAIL=0 + 负向拦截验证）。
 
 ## 免责声明
 
