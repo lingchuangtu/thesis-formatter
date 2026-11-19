@@ -47,7 +47,7 @@ python scripts/inspect_template.py <模板> -o spec.json --summary summary.md   
 python scripts/transform_paper.py --print-template                            # 看配置骨架
 # 按诊断填好 transform 配置（参考 assets/transform-config.example.json）
 python scripts/transform_paper.py <配置.json>                                # 格式移植
-python scripts/rebuild_cover.py <封面配置.json>                              # 需要封面时
+python scripts/rebuild_cover.py <无封面.docx> <模板.docx> <带封面.docx>       # 封面必做，零配置
 python scripts/audit_content.py <原论文> <成品> --normalize-headings         # 内容零丢失
 python scripts/verify_requirements.py <成品> --spec spec.json --report report.md
 ```
@@ -59,7 +59,7 @@ python scripts/verify_requirements.py <成品> --spec spec.json --report report.
 | `scripts/inspect_template.py` | 解析模板样式/页面设置/页眉页脚，生成 spec 与摘要 |
 | `scripts/build_document.py` | 路径A：克隆模板整包，替换正文，保留全部格式定义 |
 | `scripts/transform_paper.py` | 路径B：配置驱动的格式移植（样式/分节/页眉页脚/标题编号），含结构自检 |
-| `scripts/rebuild_cover.py` | 路径B：按模板重建封面（校徽/字段/独立节） |
+| `scripts/rebuild_cover.py` | 路径B 必做：零配置重建封面（自动识别封面/题目/校徽，只替换题目，个人信息清空留空，独立节） |
 | `scripts/audit_content.py` | 内容零丢失核验（文字/图片/表格/绘图/XML） |
 | `scripts/verify_requirements.py` | 对照 spec 与 requirements 逐项验收，输出报告与退出码 |
 | `scripts/docx_utils.py` | 共享 OOXML 读写工具 |
