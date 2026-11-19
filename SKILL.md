@@ -38,7 +38,7 @@ agent_created: true
 判断方法：检查论文 docx 是否含 `word/media/`、`w:tbl`、`w:drawing`；模板 `styles.xml` 是否有非标准样式名（如 `CMheading1`）、`document.xml` 是否有多个 `w:sectPr`。**任一命中即走路径 B。**
 
 - 路径 B 的完整方法、诊断清单、避坑经验见 `references/real-world-workflow.md`，配置示例见 `assets/transform-config.example.json` 和 `assets/cover-config.example.json`。
-- 下面步骤 1~5 是**路径 A（克隆法）**；路径 B 按 real-world-workflow.md 执行「诊断 → 配置 → transform_paper → rebuild_cover（如需）→ 验证三件套」。
+- 下面步骤 1~5 是**路径 A（克隆法）**；路径 B 按 real-world-workflow.md 执行「诊断 → 配置 → transform_paper → **rebuild_cover（必做）** → 验证三件套」。封面默认必做，见步骤 4。
 
 ## 工作流（路径 A：克隆法）
 
@@ -81,7 +81,10 @@ agent_created: true
 1. **诊断**（只读，不写代码）：按 `references/real-world-workflow.md` 第二节摸清模板分节/样式/页码和论文段落/标题编号/内容指纹。
 2. **配置**：`python scripts/transform_paper.py --print-template` 出配置骨架，按诊断填 `assets/transform-config.example.json`。
 3. **移植**：`python scripts/transform_paper.py <配置.json>` —— 样式移植 + 清直接格式 + 标题重编号 + 分节重建 + 页眉页脚移植，输出时自带结构零丢失自检。
-4. **封面**（如需）：`python scripts/rebuild_cover.py <封面配置.json>` —— 配置骨架用 `--print-template` 生成。
+4. **封面（默认必做，零配置）**：`python scripts/rebuild_cover.py <第3步成品.docx> <学校模板.docx> <带封面成品.docx>`。
+   - 脚本自动识别模板封面范围、取论文题目、搬迁校徽、读取封面页边距；**只替换题目，个人信息（姓名/学号/导师/专业/学院/日期）一律清空只留标签**——不强制用户提供隐私信息。
+   - 仅当自动识别不适用时才用配置覆盖：`python scripts/rebuild_cover.py <config.json>`（骨架 `--print-template`）。
+   - 判定封面是否成功：第一页应有校徽 + "毕业论文" + 题目（新）+ 空的下划线字段；若仍是模板示例题目/示例姓名，说明漏跑了这一步。
 5. **验证三件套**：
    - `python scripts/audit_content.py <原论文> <成品> --normalize-headings` —— 内容零丢失（全 PASS）。
    - `python scripts/inspect_template.py <模板> -o spec.json` + `python scripts/verify_requirements.py <成品> --spec spec.json --report report.md` —— 格式达标（区分真实缺陷与示例文字/自定义样式误报，见参考文档第五节）。
@@ -89,6 +92,7 @@ agent_created: true
 
 ## 红线
 
+- **封面默认必做**：路径 B 排版后必须跑 `rebuild_cover.py` 生成带封面的第一页；封面个人信息只清空、不向用户索取（属隐私），题目必须替换为论文题目。不得交付"页面仍是模板示例题目/示例姓名"的文档。
 - **含表格/图片/代码的论文绝不用克隆法**，必须走移植法，否则丢图丢表。
 - 不得新建空白文档拼版；路径 A 必须从模板原包克隆，路径 B 必须以论文原文件为基线。
 - 不得跳过内容零丢失验证；`audit_content.py` 非全 PASS 不得交付。
@@ -107,7 +111,7 @@ agent_created: true
 - `scripts/inspect_template.py`：解析模板 → spec.json + 人类可读摘要。
 - `scripts/build_document.py`：**路径A** 克隆模板 + 替换正文 → 输出 docx。
 - `scripts/transform_paper.py`：**路径B** 配置驱动的格式移植（样式/分节/页眉页脚/标题编号）→ 输出 docx，含结构自检。
-- `scripts/rebuild_cover.py`：**路径B** 按模板重建封面（校徽/字段/独立节）。
+- `scripts/rebuild_cover.py`：**路径B 必做** 零配置重建封面（自动识别封面/题目/校徽，只替换题目，个人信息清空留空，独立节）。用法：`rebuild_cover.py <无封面.docx> <模板.docx> <输出.docx>`。
 - `scripts/audit_content.py`：内容零丢失核验（文字哈希/图片/表格/绘图/XML），`--normalize-headings` 容忍编号规范化。
 - `scripts/verify_requirements.py`：逐项验收 → report.md（FAIL 非零退出）。
 - `scripts/docx_utils.py`：共享 OOXML 读写工具（无第三方依赖）。
@@ -116,7 +120,7 @@ agent_created: true
 - `assets/content.example.json`：路径A 内容模型示例。
 - `assets/requirements.example.json`：额外硬性要求示例。
 - `assets/transform-config.example.json`：路径B 移植配置示例。
-- `assets/cover-config.example.json`：路径B 封面配置示例。
+- `assets/cover-config.example.json`：封面**可选覆盖**配置（零配置命令通常不需要）。
 - `tests/selftest.py`：一键自测（正向 FAIL=0 + 负向拦截验证）。
 
 ## 免责声明
