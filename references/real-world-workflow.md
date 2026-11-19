@@ -87,19 +87,29 @@ python scripts/verify_requirements.py <排版后.docx> --spec spec.json --report
 
 确认：封面节无页眉页脚、页码从摘要/正文正确起算、奇偶页眉正确、目录域需在 Word/WPS 中按 F9 更新。
 
-## 六、封面重建（rebuild_cover.py）
+## 六、封面重建（rebuild_cover.py，路径B 默认必做）
 
-论文原文没有规范封面时，用 `scripts/rebuild_cover.py`。它从模板提取封面段落原始 XML（保留校徽图片、黑体字号、下划线、空行），替换题目、清空自填字段，处理校徽图片的 rId 与 media 映射，把封面设为独立节（无页眉页脚）。
+**零配置命令（推荐，换 AI/换模板都稳）：**
 
-关键配置：
+```bash
+python scripts/rebuild_cover.py <第3步无封面成品.docx> <学校模板.docx> <带封面成品.docx>
+```
 
-- `cover_range`：模板封面段落区间 [起, 终)，从 body 直属 `w:p` 数。
-- `logo`：模板 rId、模板 media 路径、输出 media 路径、新 rId（脚本自动避让冲突）。
-- `fields_to_blank`：需要清空值但保留标签的字段（姓名/学号/导师等）。
-- `drop_paragraphs` / `move_to_cover`：原文标题/声明段落的处理。
-- `cover_section`：封面页边距（通常独立配置）。
+脚本自动完成，**不需要用户填任何配置、不需要提供个人信息**：
 
-重建后必须重跑 5.1 与 5.2。
+1. **自动识别封面范围**：从模板 body 第一个 `w:p` 到第一个带 `sectPr` 的段落（含），兜底用"完成日期/答辩日期"所在段。
+2. **自动取论文题目**：src 第一个非空段落。
+3. **只替换题目**：封面「题目：」栏的示例值换成论文题目；其他段落一律不动结构。
+4. **个人信息一律清空**：姓名/学号/导师/专业/学院/日期等命中标签后只保留"标签："与下划线，值清空——**属隐私，不强制客户提供，由使用者在 Word 里自填**。
+5. **自动搬迁校徽**：从模板 rels 找到封面首图，分配不冲突的新 rId 与独立 media 文件（`school_logo.png`）。
+6. **自动读封面页边距**：从模板封面节 `sectPr` 的 `pgSz/pgMar/cols/docGrid` 读取。
+7. 原文标题段删除；紧随标题的短声明段移到封面末尾保留（内容零丢失）。
+
+**可选覆盖**（自动识别不适用时）：`python scripts/rebuild_cover.py <config.json>`，骨架用 `--print-template`。可覆盖 `new_title` / `cover_range` / `title.old` / `fields_to_blank` / `logo` / `drop_paragraphs` / `move_to_cover` / `cover_section`。
+
+**验收判定**：第一页应有校徽 + "毕业论文" + 新题目 + 空的下划线字段。若仍显示模板示例题目或示例姓名（如"快论文""20135091612"），说明漏跑本步骤或用错了旧版脚本，必须重做。
+
+重建后必须重跑 5.1 与 5.2。注意 `audit_content.py` 会因"封面新增校徽+字段文字"误报 FAIL，用精确复核（排除封面段逐段+逐字节比对）确认正文零丢失即可。
 
 ## 七、坑位清单（血泪经验）
 
